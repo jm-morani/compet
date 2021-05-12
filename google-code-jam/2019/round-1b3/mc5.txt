@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
+###############################################################
+# Toutes mes félicitations, cher Alb4tor, ainsi qu'à Madame ! #
+# Tu as tant à transmettre que trois ne seront pas de trop.   #
+###############################################################
+
+import sys
+
+
+def resoudre(N, K, C, D):
+    """
+    Renvoie un entier qui est la solution
+    """
+    max_c = max(C)
+    max_d = max(D)
+    if max_c > max_d:
+        print "A"
+        O = reduce(lambda x, y: x + 1 if max_d - y <= K else x, C, 0) 
+        M = reduce(lambda x, y: x + 1 if max_c == y else x, C, 0)
+    else:
+        print "B"
+        M = reduce(lambda x, y: x + 1 if max_d == y else x, D, 0)
+        O = reduce(lambda x, y: x + 1 if max_d - y <= K else x, D, 0) 
+    
+    print C, max_c
+    print D, max_d
+    print M, O, max_c
+    return x, y
+    
+    # d = reduce(lambda x, y: x + 1 if max_c - y <= K else x, D, 0)
+
+    return c * d
+
+
+def test():
+    """
+    Faire N fois du random et une résolution exhaustive à titre de comparaison
+    """
+    #print(randint(0, 9))
+    pass
+
+
+def main():
+    T = int(raw_input())
+    for t in xrange(T):
+        (N, K) = map(int, raw_input().split(' '))
+        C = map(int, raw_input().split(' '))
+        D = map(int, raw_input().split(' '))
+        resultat = resoudre(N, K, C, D)
+        print "Case #%d: %s" % (t+1, resultat)
+
+
+if __name__ == '__main__':
+    if 'test' in sys.argv:
+        test()
+    else:
+        main()

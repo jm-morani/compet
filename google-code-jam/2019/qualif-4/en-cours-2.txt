@@ -1,0 +1,140 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
+import sys
+
+
+OK = 0
+HS = 1
+INCONNU = 2
+
+
+def debug(msg):
+    """
+    Debug avec script interactive_runner.py modifiée
+    """
+    sys.stderr.write(str(msg) + "\n")
+    sys.stderr.flush()
+
+
+def echo(chaine):
+    sys.stdout.write(chaine + "\n")
+    sys.stdout.flush()
+    debug(" <- " + chaine)
+
+
+def readline():
+    rcv = sys.stdin.readline().strip()
+    debug(" -> " + rcv)
+    return rcv
+
+
+def Compteur(sequence, avec_valeur=False):
+    """
+    Generateur comptant les valeurs
+    successives identiques
+    """
+    n = 0
+    ref = sequence[0]
+    for c in sequence:
+        if c == ref:
+            n += 1
+        else:
+            yield (n, ref) if avec_valeur else n
+            n = 1
+            ref = c
+    yield (n, ref) if avec_valeur else n
+
+
+class Resolveur():
+    def __init__(self, N, B, F):
+        #self.i = 0
+        self.N = N
+        self.B = B
+        self.F = F
+        self.connaissance = [INCONNU] * N
+        # self.connaissance = [HS, HS, HS, OK]
+
+    def proposer(self):
+        debug("Connaissance " + repr(self.connaissance))
+        
+        # S'il n'y a plus d'inconnu, on propose la solution
+        # TODO : Enlever HS et dire si nombre de broken egal au nouveau d'inconnu
+        if not INCONNU in self.connaissance:
+            i = -1
+            resultat = []
+            try:
+                while True:
+                    i = self.connaissance.index(HS, i+1)
+                    resultat.append(i+1)
+            except ValueError:
+                return " ".join([str(i) for i in resultat])
+
+        # On soumet un nouveau test.
+        b = 0
+        alternance = 0
+        proposition = []
+        
+        
+        for n, c in Compteur(self.connaissance, True):
+            debug("n=%d, c=%d" % (n, c))
+            if c == INCONNU:
+                b = n
+                alternance = 1 - alternance
+                # Inconnu : On alterne tous les B bits ou demi-zone inconnue.
+                while n > self.B:
+                    demi = (n-1) / 2 + 1
+                    m = min(self.B + 1, demi)
+                    debug("m=%d" % m)
+                    proposition.extend([alternance] * m)
+                    alternance = 1 - alternance
+                    n = n - m
+                proposition.extend([alternance] * n)
+            else:
+                # Connu : On alterne une fois pour marquer la fin.
+                proposition.extend([3] * n)
+
+        # S'en souvenir pour recevoir()
+        self.proposition = proposition
+        return "".join([str(i) for i in proposition])
+
+    def recevoir(self, reponse):
+        i = 0
+        prp = Compteur(self.proposition)
+        rep = Compteur(reponse)
+        for p in prp:
+            r = rep.next()
+            if r == p:
+                for j in range(r):
+                    self.connaissance[i] = OK
+                    i += 1
+            else:
+                i = i + p
+
+
+def main():
+    """
+    Resolution interactive
+    """
+    T = int(sys.stdin.readline())
+    for i in xrange(T):
+        debug("== Test %d ==" % (i+1))
+        N, B, F = [int(x) for x in readline().split(' ')]
+        resolveur = Resolveur(N, B, F)
+        
+        for i in range(F+1):
+            proposition = resolveur.proposer()
+            echo(proposition)
+            
+            rcv = readline()
+            if rcv == "-1":
+                sys.exit(0)
+            
+            if " " in proposition:
+                break
+
+            resolveur.recevoir(rcv)
+
+
+if __name__ == '__main__':
+    main()

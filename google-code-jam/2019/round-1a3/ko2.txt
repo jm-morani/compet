@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
+import sys
+
+def chercher(reversed, prefix):
+    sub = filter(lambda x: x.startswith(prefix), reversed)
+    if len(sub) < 2:
+        return 0
+    if len(sub) == 2:
+        reversed.remove(sub[0])
+        reversed.remove(sub[1])
+        return 1
+
+    print "-", reversed
+    print " ", prefix, sub
+
+    total = 0
+    debuts = set(rev[:len(prefix) + 1] for rev in sub)
+    print debuts
+    for debut in debuts:
+        # sub = filter(lambda x: x.startswith(debut), sub)
+
+        total += chercher(sub, debut)
+    total += chercher(sub, '')
+        
+    return total
+
+
+def resoudre(mots):
+    reversed = [mot[::-1] for mot in mots]
+    return 2 * chercher(reversed, '')
+
+
+def test():
+    pass
+
+
+def main():
+    T = int(raw_input())
+    for t in xrange(T):
+        N = int(raw_input())
+        mots = [raw_input().strip() for n in xrange(N)]
+        print "Case #%d: %d" % (t+1, resoudre(mots))
+
+
+if __name__ == '__main__':
+    if 'test' in sys.argv:
+        test()
+    else:
+        main()

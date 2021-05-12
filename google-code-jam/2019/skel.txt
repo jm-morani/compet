@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
+###############################################################
+# Toutes mes félicitations, cher Alb4tor, ainsi qu'à Madame ! #
+# Tu as tant à transmettre que trois ne seront pas de trop.   #
+###############################################################
+
+import sys
+
+
+def resoudre(K, C, D):
+    """
+    Renvoie un entier qui est la solution
+    """
+    reste = set([(r, c) for c in range(C) for r in range(R)])
+
+    for depart in DepartsPossibles(R, C):
+        r, c = depart
+
+        try:
+            deplacer(reste, r, c)
+        except Found as e:
+            return e.suivants  # POSSIBLE
+
+    return []  # IMPOSSIBLE
+
+
+def test():
+    """
+    Faire N fois du random et une résolution exhaustive à titre de comparaison
+    """
+    pass
+
+
+def main():
+    T = int(raw_input())
+    for t in xrange(T):
+        (N, K) = map(int, raw_input().split(' '))
+        C = map(int, raw_input().split(' '))
+        D = map(int, raw_input().split(' '))
+        resultat = resoudre(K, C, D)
+        print "Case #%d: %s" % (t+1, resultat)
+
+
+if __name__ == '__main__':
+    if 'test' in sys.argv:
+        test()
+    else:
+        main()

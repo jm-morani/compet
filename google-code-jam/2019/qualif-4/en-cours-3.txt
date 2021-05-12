@@ -1,0 +1,177 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
+import sys
+from itertools import chain
+
+OK = 'ok'
+HS = 'hs'
+INCONNU = '??'
+
+
+def debug(msg):
+    """
+    Debug avec script interactive_runner.py modifiée
+    """
+    sys.stderr.write(str(msg) + "\n")
+    sys.stderr.flush()
+
+
+def echo(chaine):
+    sys.stdout.write(chaine + "\n")
+    sys.stdout.flush()
+    debug(" <- " + chaine)
+
+
+def readline():
+    rcv = sys.stdin.readline().strip()
+    debug(" -> " + rcv)
+    return rcv
+
+
+#
+def decompter(liste, ref):
+    n = 0
+    liste = list(liste) # TODO Utilser chain
+    while len(liste) > 0:
+        c = liste[0]
+        if c == ref:
+            liste.pop(0)
+            n += 1
+        else:
+            return n
+    return n
+
+
+def Compteur(sequence, avec_valeur=False):
+    """
+    Generateur comptant les valeurs
+    successives identiques
+    """
+    n = 0
+    ref = sequence[0]
+    for c in sequence:
+        if c == ref:
+            n += 1
+        else:
+            yield (n, ref) if avec_valeur else n
+            n = 1
+            ref = c
+    yield (n, ref) if avec_valeur else n
+
+
+class Resolveur():
+    def __init__(self, N, B, F):
+        self.i = 0
+        self.N = N
+        self.B = B
+        self.F = F
+        self.connaissance = [(self.N, INCONNU, self.B)]
+
+    def proposer(self):
+        # self.i += 1
+        # if self.i > 2:
+            # sys.exit(0)
+        debug("Connaissance " + repr(self.connaissance))
+        
+        # S'il n'y a plus d'inconnu, on propose la solution
+        lst = filter(lambda t: t[1] == INCONNU, self.connaissance)
+        if len(lst) == 0:
+            i = 0
+            resultat = []
+            for (n, c, b) in self.connaissance:
+                if c == HS:
+                    resultat.extend([i + j for j in range(n)])
+                i += n
+            return " ".join([str(1+i) for i in resultat])
+
+        # On soumet un nouveau test.
+        b = 0
+        alternance = 0
+        proposition = []
+        
+        
+        for n, c, b in self.connaissance:
+            debug("n=%d, c=%s, b=%d" % (n, c, b))
+            if c == INCONNU:
+                # Inconnu : On alterne tous les B bits ou demi-zone inconnue.
+                demi = (n-1) / 2 + 1
+                while n > b:
+                    m = min(b + 1, demi)
+                    debug("m=%d" % m)
+                    proposition.extend([alternance] * m)
+                    alternance = 1 - alternance
+                    n = n - m
+                proposition.extend([alternance] * n)
+                # alternance = 1 - alternance
+            else:
+                # Connun.
+                proposition.extend([alternance] * n)
+
+        # S'en souvenir pour recevoir()
+        self.proposition = proposition
+        return "".join([str(i) for i in proposition])
+
+    def recevoir(self, reponse):
+        i = 0
+        prp = list(self.proposition)
+        rep = list(reponse)
+        newcon = []
+        for n, c, b in self.connaissance:
+            debug("X n=%d, c=%s, b=%d" % (n, c, b))
+            if c == OK:
+                del prp[:n], rep[:n]
+                newcon.append((n, c, b))
+            elif c == HS:
+                del prp[:n]
+                newcon.append((n, c, b))
+            else:  # c == INCONNU
+                while n > 0:
+                    ref = prp[0]
+                    r = decompter(rep, ref)
+                    p = decompter(prp, ref)
+                    debug("n=%d,ref = %s" % (n, repr(ref)))
+                    debug('prp = %s, p = %d' % (prp, p))
+                    debug('rep = %s, r = %d' % (rep, r))
+                    
+                    debug("p=%d, r=%d" % (p, r))
+                    if r == 0:
+                        del prp[:p]
+                        newcon.append((p, HS, p))
+                    elif r == p:
+                        del prp[:p], rep[:p]
+                        newcon.append((p, OK, 0))
+                    else:
+                        del prp[:p], rep[:r]
+                        newcon.append((p, INCONNU, p-r))
+                    n -= p
+
+        self.connaissance = newcon
+
+
+def main():
+    """
+    Resolution interactive
+    """
+    T = int(sys.stdin.readline())
+    for i in xrange(T):
+        debug("== Test %d ==" % (i+1))
+        N, B, F = [int(x) for x in readline().split(' ')]
+        resolveur = Resolveur(N, B, F)
+        
+        for i in range(F+1):
+            proposition = resolveur.proposer()
+            echo(proposition)
+            
+            rcv = readline()
+            if rcv == "-1":
+                sys.exit(0)
+            
+            if " " in proposition:
+                break
+
+            resolveur.recevoir([int(c) for c in rcv])
+
+
+if __name__ == '__main__':
+    main()

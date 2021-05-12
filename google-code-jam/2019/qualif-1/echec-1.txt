@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
+import sys
+
+
+def resoudre(x):
+    rang = 1
+    A, B = 0, 0
+    while x > 0:
+        x, r = divmod(x, 10)
+        a, b = (1, r - 1) if r != 5 else (2, r-2)
+        A += rang * a
+        B += rang * b
+        rang *= 10
+    return (A, B)
+
+
+def main():
+    N = int(sys.stdin.readline())
+    for i in xrange(N):
+        x = int(sys.stdin.readline())
+        (a, b) = resoudre(x)
+        #print "DEBUG %d = %d %d" % (x, a, b)
+        print "%d %d" % (a, b)
+
+
+def test():
+    for x in xrange(1, 1000):
+        (a, b) = resoudre(x)
+        echec = False
+        if a + b != x:
+            echec = True
+        if "4" in str(a):
+            echec = True
+        if "4" in str(b):
+            echec = True
+        if echec:
+            print "ECHEC %d = %d + %d" % (x, a, b)
+
+
+if __name__ == '__main__':
+    if 'test' in sys.argv:
+        test()
+    else:
+        main()

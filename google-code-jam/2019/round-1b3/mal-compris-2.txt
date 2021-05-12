@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
+###############################################################
+# Toutes mes félicitations, cher Alb4tor, ainsi qu'à Madame ! #
+# Tu as tant à transmettre que trois ne seront pas de trop.   #
+###############################################################
+
+import sys
+from math import factorial
+
+
+def combi(n, k):
+
+def resoudre(N, K, C, D):
+    """
+    Renvoie un entier qui est la solution
+    """
+    max_c = max(C)
+    max_d = max(D)
+    c = reduce(lambda x, y: x + 1 if max_d - y == K  else x, C, 0)
+    d = reduce(lambda x, y: x + 1 if max_c - y == K else x, D, 0)
+    print max_c, max_d, c, d
+    return combi(c + d, c)
+
+
+def test():
+    """
+    Faire N fois du random et une résolution exhaustive à titre de comparaison
+    """
+    #print(randint(0, 9))
+    pass
+
+
+def main():
+    T = int(raw_input())
+    for t in xrange(T):
+        (N, K) = map(int, raw_input().split(' '))
+        C = map(int, raw_input().split(' '))
+        D = map(int, raw_input().split(' '))
+        resultat = resoudre(N, K, C, D)
+        print "Case #%d: %s" % (t+1, resultat)
+
+
+if __name__ == '__main__':
+    if 'test' in sys.argv:
+        test()
+    else:
+        main()
