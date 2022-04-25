@@ -1,0 +1,64 @@
+#!/usr/bin/python3
+
+from random import randint
+import math
+infini = math.inf
+
+
+def plus_petit(valeurs):
+    minimum, index = valeurs[0], 0
+    for i, valeur in enumerate(valeurs):
+        if valeur < minimum:
+            minimum, index = valeur, i
+    return minimum, index
+
+
+def fusionner(générateurs):
+    valeurs = [next(générateur, infini) for générateur in générateurs]
+    while True:
+        valeur, index = plus_petit(valeurs)
+        yield valeur
+        valeurs[index] = next(générateurs[index], infini)
+
+
+def infrange(initiale):
+    while True:
+        yield initiale
+        initiale += 1
+
+
+def générer(Y, longueur):
+    référence_initiale = int(str(Y)[:longueur])
+
+    def xgénérer(initiale):
+        for référence in infrange(initiale):
+            hypothèse = str(référence)
+            référence += 1
+            hypothèse += str(référence)
+            while int(hypothèse) <= Y:
+                référence += 1
+                hypothèse += str(référence)
+            yield int(hypothèse)
+
+    return fusionner([
+        xgénérer(référence_initiale),
+        xgénérer(référence_initiale + 1)
+    ])
+
+    
+def resoudre(Y):
+    générateurs = [générer(Y, l) for l in range(1, len(str(Y)) + 1)]
+    return next(fusionner(générateurs))
+
+
+def main():
+    T = int(input().strip())
+    for x in range(1, T + 1):
+        Y = int(input())
+        z = resoudre(Y)
+        print(f"Case #{x}: {z}")
+
+
+if __name__ == "__main__":
+    main()
+

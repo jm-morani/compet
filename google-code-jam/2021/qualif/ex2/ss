@@ -1,0 +1,72 @@
+#!/usr/bin/python3
+
+
+def resoudre(X, Y, S):
+    print(f"{X=} {Y=} {S=}")
+
+    cout = 0
+    for i in range(1, len(S)):
+        x, y = S[i-1], S[i]
+        if x == "C" and y == "J":
+            cout += X
+        elif x == "J" and y == "C":
+            cout += Y
+
+    print(f"init {cout=}")
+    optimal = float('inf')
+    ideal = cout # FAUX min(X, Y, 0) * (len(S) - 1)
+
+    def chiffrer(x, y):
+        if x == "C" and y == "J":
+            return X
+        elif x == "J" and y == "C":
+            return Y
+        return 0
+
+    def parcourir(cout, i=1, branche=False):
+        nonlocal optimal
+
+        '''if cout >= optimal:
+            print(S, cout, "+")
+            return float('inf')
+'''
+        if i >= len(S):
+            print(S, cout, "*" if cout < optimal else "")
+            if cout < optimal:
+                optimal = cout
+            return cout
+
+        x, y = S[i-1], S[i]
+            
+        if y != "?":
+            if branche:
+                cout += chiffrer(x, y)
+            return parcourir(cout, i+1)
+
+        print(S[:i], cout)        
+        # TODO REMOVE
+        S[i] = "C" 
+        #print(x, "C", cout + chiffrer(x, "C"))
+        c = parcourir(cout + chiffrer(x, "C"), i+1, True)
+        S[i] = "J"
+        #print(x, "J", cout + chiffrer(x, "J"))
+        j = parcourir(cout + chiffrer(x, "J"), i+1, True)
+        S[i] = "?"
+        return min(c, j)
+        
+        # TODO UNCOMMENT
+        #return min(parcourir(cout, i+1, "C"), parcourir(cout, i+1, "J"))
+        
+    return parcourir(cout)
+
+
+def main():
+    T = int(input().strip())
+    for i in range(1, T + 1):
+        X, Y, S = input().strip().split(' ')
+        solution = resoudre(int(X), int(Y), list(S))
+        print(f"Case #{i}: {solution}")
+
+
+main()
+
